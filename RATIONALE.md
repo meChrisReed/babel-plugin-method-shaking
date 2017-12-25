@@ -1,17 +1,17 @@
 # Why have I made certain decisions?
 
-## How / Why test in this way?
+## Why test in this way?
 
-This repo is following TDD (test driven development).
-I chose not to use any babel specific tool for testing because
+I chose not to use any babel specific tool for testing because:
 
-* I did not want the testing pattern to be foreign.
+* I did not want the testing pattern to be foreign
 * Other developers can easily convert to whatever the next cool testing tool is
+* Developers can use their knowledge of more popular tools to improve this pattern
 
 The pattern I selected is
 
 * Directly import `babel-core`
-* Import a js sample file as a string.
+* Import a js sample file as a string
   * Files should be in the format `test-name.sample.js`
 * Parse the string with `babel` using our plugin
 * Compare that result to an expected file.

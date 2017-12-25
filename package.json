@@ -1,7 +1,8 @@
 {
-  "name": "babel-plugin-prototype-shaking",
+  "name": "babel-plugin-method-shaking",
   "version": "1.0.0",
-  "description": "A Babel plugin to remove unused prototype properties and methods from your distributable",
+  "description":
+    "A Babel plugin to remove unused prototype properties and methods from your distributable",
   "main": "src/index.js",
   "author": "Chris Reed",
   "license": "MIT",

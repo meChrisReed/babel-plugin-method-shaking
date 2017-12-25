@@ -29,8 +29,10 @@ test("Basic Test Reading Files", async t => {
 
 test("basic-custom-plugin", async t => {
   const sample = filePromise("spec/samples/basic.sample.js")
+  // console.log(JSON.stringify(transform(await sample)))
+  pluginTransform(await sample)
 
-  const expected = filePromise("spec/samples/basic.expected.js")
-
-  t.is(pluginTransform(await sample), noPluginTransform(await expected))
+  // const expected = filePromise("spec/samples/basic.expected.js")
+  t.fail()
+  // t.is(pluginTransform(await sample), noPluginTransform(await expected))
 })
