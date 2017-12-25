@@ -2,11 +2,12 @@ const merge = require("deep-extend")
 
 // super dumb mutation thing
 // `deep-extend` which has been named `merge` will mutate the first object
+// `updatePath` is used to hide the mutation. It will likely be removed in favor of `babel-template`
 const updatePath = (base, current) => merge(base, current) && undefined
 
 // isMethod checks that this ObjectProperty holds a function
 // I tried `t.isObjectMethod` from `babel-types` it did not identify any of the methods with the `ObjectProperty` node type
-// There is likely a better way to do this
+// There is likely a better / more Babel way to do this
 // Path -> Boolean
 const isMethod = ({ node: { type, value } }) =>
   ({
@@ -22,11 +23,12 @@ const isMethod = ({ node: { type, value } }) =>
 
 // `Program` is the root element
 // I am finding the root element to compare against every `MemberExpression`
-// This can be replaced by first finding all of the `MemberExpression`s first then doing the rest of the traversal
+// TODO: This can be replaced by first finding all of the `MemberExpression`s first then doing the rest of the traversal
+// also `scope.parentBlock` appears to hold the program
 const findProgram = path =>
   path.findParent(parentPath => parentPath.isProgram())
 
-module.exports = ({ types: t }) => {
+module.exports = ({ types: t }) => ({
   visitor: {
     ObjectProperty: objectPropertyPath => {
       const name = objectPropertyPath.node.key.name
@@ -45,7 +47,17 @@ module.exports = ({ types: t }) => {
         program.traverse({
           MemberExpression: memberExpressionPath => {
             if (memberExpressionPath.node.property.name === name) {
-              console.log(`${name} was used`)
+              const parentObject = objectPropertyPath.findParent(
+                parentPath => parentPath.type === "VariableDeclarator"
+              )
+              if (
+                parentObject.node.id.name ===
+                memberExpressionPath.node.object.name
+              ) {
+                console.log(`${name} was used`)
+              } else {
+                console.log(`${name} was not used`)
+              }
             } else {
               console.log(`${name} was not used`)
             }
@@ -54,4 +66,4 @@ module.exports = ({ types: t }) => {
       }
     }
   }
-}
+})
