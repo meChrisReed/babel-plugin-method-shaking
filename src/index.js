@@ -9,7 +9,12 @@ const updatePath = (base, current) => merge(base, current) && undefined
 // I tried `t.isObjectMethod` from `babel-types` it did not identify any of the methods with the `ObjectProperty` node type
 // There is likely a better / more Babel way to do this
 // Path -> Boolean
-const isMethod = ({ node: { type, value } }) =>
+const isMethod = ({
+    node: {
+      type,
+      value
+    }
+  }) =>
   ({
     // default
     true: false,
@@ -28,7 +33,9 @@ const isMethod = ({ node: { type, value } }) =>
 const findProgram = path =>
   path.findParent(parentPath => parentPath.isProgram())
 
-module.exports = ({ types: t }) => ({
+module.exports = ({
+  types: t
+}) => ({
   visitor: {
     ObjectProperty: objectPropertyPath => {
       const name = objectPropertyPath.node.key.name
@@ -57,9 +64,11 @@ module.exports = ({ types: t }) => ({
                 console.log(`${name} was used`)
               } else {
                 console.log(`${name} was not used`)
+                objectPropertyPath.remove()
               }
             } else {
               console.log(`${name} was not used`)
+              objectPropertyPath.remove()
             }
           }
         })
