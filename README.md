@@ -23,6 +23,7 @@ The pattern I have been using to iterate changes:
 **Features**
 
 * All of the method creation patterns
+* Deep methods
 * Follow inheritance chains
 * Follow renaming paths
 * High fives all around
