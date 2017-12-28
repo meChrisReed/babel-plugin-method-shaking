@@ -25,6 +25,20 @@ const createMemberExpressionCache = (cache = []) => ({
 const isUsedMethod = (obj, method, cache) =>
   cache.find(cached => cached.rawObject === obj && cached.rawMethod === method)
 
+const getObjectName = path =>
+  ({
+    [true]: () => "all options where undefined",
+
+    [!!(path.node.callee.object && path.node.callee.object.name)]: () =>
+      path.node.callee.object.name,
+
+    [!!(
+      path.node.callee.object &&
+      path.node.callee.object.object &&
+      path.node.callee.object.object.name
+    )]: () => path.node.callee.object.object.name
+  }[true]())
+
 module.exports = ({ types: t }) => {
   const memberExpressionCache = createMemberExpressionCache()
 
@@ -33,23 +47,10 @@ module.exports = ({ types: t }) => {
       Program: programPath => {
         programPath.traverse({
           CallExpression: callExpressionPath => {
-            // TODO this will need to be updated with path storage
+            // TODO: this will need to be updated with path storage
             // Currently there is a lot of room for inaccurate results
             memberExpressionCache.updateCache({
-              rawObject: {
-                [true]: () => "all options where undefined",
-
-                [!!(
-                  callExpressionPath.node.callee.object &&
-                  callExpressionPath.node.callee.object.name
-                )]: () => callExpressionPath.node.callee.object.name,
-
-                [!!(
-                  callExpressionPath.node.callee.object &&
-                  callExpressionPath.node.callee.object.object &&
-                  callExpressionPath.node.callee.object.object.name
-                )]: () => callExpressionPath.node.callee.object.object.name
-              }[true](),
+              rawObject: getObjectName(callExpressionPath),
 
               rawMethod: callExpressionPath.node.callee.property.name
 
