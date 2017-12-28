@@ -32,10 +32,34 @@ module.exports = ({ types: t }) => {
     visitor: {
       Program: programPath => {
         programPath.traverse({
-          MemberExpression: memberExpressionPath => {
+          CallExpression: callExpressionPath => {
+            // TODO this will need to be updated with path storage
+            // Currently there is a lot of room for inaccurate results
             memberExpressionCache.updateCache({
-              rawObject: memberExpressionPath.node.object.name,
-              rawMethod: memberExpressionPath.node.property.name
+              rawObject: {
+                [true]: () => "all options where undefined",
+
+                [!!(
+                  callExpressionPath.node.callee.object &&
+                  callExpressionPath.node.callee.object.name
+                )]: () => callExpressionPath.node.callee.object.name,
+
+                [!!(
+                  callExpressionPath.node.callee.object &&
+                  callExpressionPath.node.callee.object.object &&
+                  callExpressionPath.node.callee.object.object.name
+                )]: () => callExpressionPath.node.callee.object.object.name
+              }[true](),
+
+              rawMethod: callExpressionPath.node.callee.property.name
+
+              // `path` is not used yet
+              // path: callExpressionPath,
+
+              // `nearestProp` is not used and will likely never be used. Just good to know
+              // nearestProp:
+              //   callExpressionPath.node.callee.object.property &&
+              //   callExpressionPath.node.callee.object.property.name
             })
           }
         })
@@ -47,6 +71,8 @@ module.exports = ({ types: t }) => {
         )
 
         if (
+          // TODO: isUsedMethod needs to be updated for path comparison
+          // Currently there is a lot of room for inaccurate results
           isMethod(objectPropertyPath) &&
           !isUsedMethod(
             parentObject.node.id.name,

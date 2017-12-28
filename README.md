@@ -22,8 +22,10 @@ The pattern I have been using to iterate changes:
 
 **Features**
 
+* ~~Match original method name and original object identifier~~
+* ~~Deep methods~~
+* Correctly match calls with the same method name, but different property paths. `a.b.call()` vs `a.c.call()`
 * All of the method creation patterns
-* Deep methods
 * Follow inheritance chains
 * Follow renaming paths
 * High fives all around

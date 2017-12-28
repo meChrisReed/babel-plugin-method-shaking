@@ -49,5 +49,18 @@ test("multiple-used-identifiers", async t => {
 
   const expected = filePromise("spec/samples/multiple-used-methods.expected.js")
 
+  t.is(pluginTransform(await sample, false), noPluginTransform(await expected))
+})
+
+test("deep-methods", async t => {
+  const sample = filePromise("spec/samples/deep-methods.sample.js")
+  //   log(
+  //     `
+  // ==================================== AST
+  //   `,
+  //     JSON.stringify(transform(await sample, { plugins: ["./src/index.js"] }).ast)
+  //   )
+  const expected = filePromise("spec/samples/deep-methods.expected.js")
+
   t.is(pluginTransform(await sample, true), noPluginTransform(await expected))
 })
