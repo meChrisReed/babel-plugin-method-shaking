@@ -25,6 +25,9 @@ const createMemberExpressionCache = (cache = []) => ({
 const isUsedMethod = (obj, method, cache) =>
   cache.find(cached => cached.rawObject === obj && cached.rawMethod === method)
 
+// `getObjectName` will find the object name based on the ast state
+// TODO: this will need to be updated / replaced with path storage for path matching
+// Currently there is a lot of room for inaccurate results
 const getObjectName = path =>
   ({
     [true]: () => "all options where undefined",
@@ -47,20 +50,9 @@ module.exports = ({ types: t }) => {
       Program: programPath => {
         programPath.traverse({
           CallExpression: callExpressionPath => {
-            // TODO: this will need to be updated with path storage
-            // Currently there is a lot of room for inaccurate results
             memberExpressionCache.updateCache({
               rawObject: getObjectName(callExpressionPath),
-
               rawMethod: callExpressionPath.node.callee.property.name
-
-              // `path` is not used yet
-              // path: callExpressionPath,
-
-              // `nearestProp` is not used and will likely never be used. Just good to know
-              // nearestProp:
-              //   callExpressionPath.node.callee.object.property &&
-              //   callExpressionPath.node.callee.object.property.name
             })
           }
         })
