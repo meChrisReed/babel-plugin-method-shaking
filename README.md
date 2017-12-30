@@ -21,12 +21,13 @@ The pattern I have been using to iterate changes:
 ## TODO:
 
 **Tech Debt**
-Update the testing pattern.
-I would like to write a package script that will:
 
-* Prompt for the name of test(s) you would like to isolate
-* Run all of the test except for the isolated ones; With logging from the source suppressed
-* Run the isolated tests; with logging enabled
+* Update the testing pattern. I would like to write a package script that will:
+* * Prompt for the name of test(s) you would like to isolate
+* * Run all of the test except for the isolated ones; With logging from the source suppressed
+* * Run the isolated tests; with logging enabled
+* Update `isMethod` to avoid configuration
+* Break functions out into util files
 
 **Features**
 
