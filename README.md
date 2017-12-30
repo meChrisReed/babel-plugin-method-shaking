@@ -24,7 +24,9 @@ The pattern I have been using to iterate changes:
 
 * ~~Match original method name and original object identifier~~
 * ~~Deep methods~~
-* Correctly match calls with the same method name, but different property paths. `a.b.call()` vs `a.c.call()`
+* Correctly match calls with the same method name, but different property paths. `a.used.call()` vs `a.unused.call`
+* Correctly match deep different paths `a.b.c.call` vs `a.d.c.call`
+* Clean out empty properties that have had all of their properties removed `obj = {used: {a: Function}, unused: {}}` the property `unused` can be removed
 * All of the method creation patterns
 * Follow inheritance chains
 * Follow renaming paths

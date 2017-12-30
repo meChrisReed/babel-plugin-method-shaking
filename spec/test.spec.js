@@ -6,7 +6,8 @@ import { readFile } from "fs"
 // store the log function
 const log = console.log
 // suppress logging
-console.log = function() {}
+console.log = () =>
+  log("`console.log` is suppressed try the global function `log` instead")
 
 // filePromise: Reads a file and returns a Promise.
 // The Promise is resolved when the file is read and converted to a string.
@@ -29,33 +30,46 @@ const pluginTransform = (code, logging = false) => {
 }
 
 test("Basic Test Reading Files", async t => {
-  const sample = filePromise("spec/samples/make-testing-work.sample.js")
+  const sample = filePromise("spec/fixtures/make-testing-work.sample.js")
 
-  const expected = filePromise("spec/samples/make-testing-work.expected.js")
+  const expected = filePromise("spec/fixtures/make-testing-work.expected.js")
 
   t.is(await sample, await expected)
 })
 
 test("basic-custom-plugin", async t => {
-  const sample = filePromise("spec/samples/basic.sample.js")
+  const sample = filePromise("spec/fixtures/basic.sample.js")
 
-  const expected = filePromise("spec/samples/basic.expected.js")
+  const expected = filePromise("spec/fixtures/basic.expected.js")
 
   t.is(pluginTransform(await sample), noPluginTransform(await expected))
 })
 
 test("multiple-used-identifiers", async t => {
-  const sample = filePromise("spec/samples/multiple-used-methods.sample.js")
+  const sample = filePromise("spec/fixtures/multiple-used-methods.sample.js")
 
-  const expected = filePromise("spec/samples/multiple-used-methods.expected.js")
+  const expected = filePromise(
+    "spec/fixtures/multiple-used-methods.expected.js"
+  )
 
-  t.is(pluginTransform(await sample, false), noPluginTransform(await expected))
+  t.is(pluginTransform(await sample), noPluginTransform(await expected))
 })
 
 test("deep-methods", async t => {
-  const sample = filePromise("spec/samples/deep-methods.sample.js")
+  const sample = filePromise("spec/fixtures/deep-methods.sample.js")
 
-  const expected = filePromise("spec/samples/deep-methods.expected.js")
+  const expected = filePromise("spec/fixtures/deep-methods.expected.js")
+
+  t.is(pluginTransform(await sample), noPluginTransform(await expected))
+})
+
+test("deep-methods", async t => {
+  const sample = filePromise("spec/fixtures/different-property-paths.sample.js")
+
+  const expected = filePromise(
+    "spec/fixtures/different-property-paths.expected.js"
+  )
+  // log(JSON.stringify(transform(await sample).ast))
 
   t.is(pluginTransform(await sample, true), noPluginTransform(await expected))
 })
