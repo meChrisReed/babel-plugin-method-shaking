@@ -20,11 +20,19 @@ The pattern I have been using to iterate changes:
 
 ## TODO:
 
+**Tech Debt**
+Update the testing pattern.
+I would like to write a package script that will:
+
+* Prompt for the name of test(s) you would like to isolate
+* Run all of the test except for the isolated ones; With logging from the source suppressed
+* Run the isolated tests; with logging enabled
+
 **Features**
 
 * ~~Match original method name and original object identifier~~
 * ~~Deep methods~~
-* Correctly match calls with the same method name, but different property paths. `a.used.call()` vs `a.unused.call`
+* ~~Correctly match calls with the same method name, but different property paths. `a.used.call()` vs `a.unused.call`~~
 * Correctly match deep different paths `a.b.c.call` vs `a.d.c.call`
 * Clean out empty properties that have had all of their properties removed `obj = {used: {a: Function}, unused: {}}` the property `unused` can be removed
 * All of the method creation patterns
