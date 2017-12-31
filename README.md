@@ -27,7 +27,7 @@ The pattern I have been using to iterate changes:
   * Run all of the test except for the isolated ones; With logging from the source suppressed
   * Run the isolated tests; with logging enabled
 * Update `isMethod` to avoid configuration, by making the recursion work on shallow forms as well
-* Break functions out into util files
+* ~~Break functions out into util files~~
 * Use babel to build this package before testing. To take advantage of modern language features
 
 **Features**

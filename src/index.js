@@ -1,46 +1,10 @@
 const isMethod = require("./isMethod")
-
-// TODO: createMemberExpressionCache contains a mutation
-// caches all of the MemberExpression for comparison
-// This is to prevent traversal of the entire program on each node visit
-const createMemberExpressionCache = (cache = []) => ({
-  updateCache: data => cache.push(data),
-  getCache: () => cache
-})
-
-// `isUsedMethod` checks that the ObjectProperty's function is used
-// Currently it just looks in the cache
-// (object containing method, method name, cache) -> Boolean
-const isUsedMethod = ({
-  obj,
-  method,
-  cache,
-  pathToken,
-  hasParentObjectProperty
-}) =>
-  hasParentObjectProperty
-    ? cache.find(cached => cached.rawPathToken === pathToken)
-    : cache.find(
-        cached => cached.rawObject === obj && cached.rawMethod === method
-      )
-
-// functions are placed outside of the getObjectName truth table for performance and readability
-const noObjectFound = path => "all options where undefined",
-  calleeObjectFound = path => path.node.callee.object.name,
-  calleeDeepObjectFound = path => path.node.callee.object.object.name
+const createMemberExpressionCache = require("./createMemberExpressionCache")
+const isUsedMethod = require("./isUsedMethod")
 
 // `getObjectName` will find the object name based on the ast state
+// callee -> top parent object identifier
 const getObjectName = ast => (ast.object ? getObjectName(ast.object) : ast.name)
-
-const getObjectNamePathPropertyName = path =>
-  ({
-    [true]: noObjectFound,
-    [!!(
-      path.node.callee.object &&
-      path.node.callee.object.property &&
-      path.node.callee.object.property.name
-    )]: path => path.node.callee.object.property.name
-  }[true](path))
 
 // callee -> lookupToken
 const generateExpressionToken = (ast, token = []) =>
@@ -48,8 +12,9 @@ const generateExpressionToken = (ast, token = []) =>
     ? generateExpressionToken(ast.object, [ast.property.name, ...token])
     : token.join(".")
 
-const generatePropertyToken = (ast, token = []) => {
-  const parent = ast.findParent(
+// babel-types:Path -> property path token excluding parent object identifier
+const generatePropertyToken = (path, token = []) => {
+  const parent = path.findParent(
     parentPath => parentPath.type === "ObjectProperty"
   )
 
