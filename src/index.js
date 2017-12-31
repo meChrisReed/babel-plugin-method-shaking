@@ -1,18 +1,4 @@
-// isMethod checks that an ObjectProperty holds a function
-// I tried `t.isObjectMethod` from `babel-types` it did not identify any of the methods with the `ObjectProperty` node type
-// There is likely a better / more Babel way to do this
-// Path -> Boolean
-const isMethod = ({ node: { type, value } }) =>
-  ({
-    // default
-    true: false,
-    // covers `{ method: Function }`
-    [value.type === "Identifier" && value.name === "Function"]: true,
-    // covers `{ method: function name(params) { } }`
-    [value.type === "FunctionExpression"]: true,
-    // covers `{ method: () => {} }`
-    [value.type === "ArrowFunctionExpression"]: true
-  }.true)
+const isMethod = require("./isMethod")
 
 // TODO: createMemberExpressionCache contains a mutation
 // caches all of the MemberExpression for comparison
@@ -44,22 +30,7 @@ const noObjectFound = path => "all options where undefined",
   calleeDeepObjectFound = path => path.node.callee.object.object.name
 
 // `getObjectName` will find the object name based on the ast state
-// TODO: this will need to be updated / replaced with path storage for path matching
-// Currently there is a lot of room for inaccurate results
-const getObjectName = path =>
-  ({
-    [true]: noObjectFound,
-
-    [!!(
-      path.node.callee.object && path.node.callee.object.name
-    )]: calleeObjectFound,
-
-    [!!(
-      path.node.callee.object &&
-      path.node.callee.object.object &&
-      path.node.callee.object.object.name
-    )]: calleeDeepObjectFound
-  }[true](path))
+const getObjectName = ast => (ast.object ? getObjectName(ast.object) : ast.name)
 
 const getObjectNamePathPropertyName = path =>
   ({
@@ -71,7 +42,21 @@ const getObjectNamePathPropertyName = path =>
     )]: path => path.node.callee.object.property.name
   }[true](path))
 
-const generateLookUpToken = path => null
+// callee -> lookupToken
+const generateExpressionToken = (ast, token = []) =>
+  ast.property
+    ? generateExpressionToken(ast.object, [ast.property.name, ...token])
+    : token.join(".")
+
+const generatePropertyToken = (ast, token = []) => {
+  const parent = ast.findParent(
+    parentPath => parentPath.type === "ObjectProperty"
+  )
+
+  return parent && parent.node && parent.node.key && parent.node.key.name
+    ? generatePropertyToken(parent, [parent.node.key.name, ...token])
+    : token.join(".")
+}
 
 module.exports = ({ types: t }) => {
   const memberExpressionCache = createMemberExpressionCache()
@@ -81,14 +66,13 @@ module.exports = ({ types: t }) => {
       Program: programPath => {
         programPath.traverse({
           CallExpression: callExpressionPath => {
+            const objectName = getObjectName(callExpressionPath.node.callee)
             memberExpressionCache.updateCache({
-              rawObject: getObjectName(callExpressionPath),
+              rawObject: objectName,
               rawMethod: callExpressionPath.node.callee.property.name,
-              rawPathToken: `${getObjectName(
-                callExpressionPath
-              )}.${getObjectNamePathPropertyName(callExpressionPath)}.${
-                callExpressionPath.node.callee.property.name
-              }`
+              rawPathToken: `${objectName}.${generateExpressionToken(
+                callExpressionPath.node.callee
+              )}`
             })
           }
         })
@@ -105,14 +89,13 @@ module.exports = ({ types: t }) => {
         )
 
         if (
-          // TODO: isUsedMethod needs to be updated for path comparison
-          // Currently there is a lot of room for inaccurate results
           isMethod(objectPropertyPath) &&
           !isUsedMethod({
             obj: parentObject.node.id.name,
             method: name,
             cache: memberExpressionCache.getCache(),
-            pathToken: `${parentObject.node.id.name}.${pathToken}.${name}`,
+            pathToken: `${parentObject.node.id.name}.${parentObjectProperty &&
+              generatePropertyToken(objectPropertyPath)}.${name}`,
             hasParentObjectProperty: parentObjectProperty
           })
         ) {

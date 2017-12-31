@@ -69,7 +69,19 @@ test("deep-methods", async t => {
   const expected = filePromise(
     "spec/fixtures/different-property-paths.expected.js"
   )
-  // log(JSON.stringify(transform(await sample).ast))
 
+  t.is(pluginTransform(await sample), noPluginTransform(await expected))
+})
+
+test("deep-methods", async t => {
+  const sample = filePromise(
+    "spec/fixtures/deep-different-property-paths.sample.js"
+  )
+
+  const expected = filePromise(
+    "spec/fixtures/deep-different-property-paths.expected.js"
+  )
+  // log(JSON.stringify(transform(await sample).ast))
+  // t.fail()
   t.is(pluginTransform(await sample, true), noPluginTransform(await expected))
 })
