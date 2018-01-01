@@ -8,11 +8,11 @@ const isMethod = ({ node: { type, value } }) =>
     // default
     true: false,
     // covers `{ method: Function }`
-    [value.type === "Identifier" && value.name === "Function"]: true,
+    [value && value.type === "Identifier" && value.name === "Function"]: true,
     // covers `{ method: function name(params) { } }`
-    [value.type === "FunctionExpression"]: true,
+    [value && value.type === "FunctionExpression"]: true,
     // covers `{ method: () => {} }`
-    [value.type === "ArrowFunctionExpression"]: true
+    [value && value.type === "ArrowFunctionExpression"]: true
   }.true)
 
 module.exports = isMethod

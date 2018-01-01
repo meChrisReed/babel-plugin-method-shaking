@@ -23,6 +23,31 @@ const generatePropertyToken = (path, token = []) => {
     : token.join(".")
 }
 
+const handleObjectProperty = (path, memberExpressionCache, methodType) => {
+  const name = path.node.key.name
+  const parentObjectProperty = path.findParent(
+    parentPath => parentPath.type === "ObjectProperty"
+  )
+  const pathToken = parentObjectProperty && parentObjectProperty.node.key.name
+  const parentObject = path.findParent(
+    parentPath => parentPath.type === "VariableDeclarator"
+  )
+
+  if (
+    (methodType || isMethod(path)) &&
+    !isUsedMethod({
+      obj: parentObject.node.id.name,
+      method: name,
+      cache: memberExpressionCache.getCache(),
+      pathToken: `${parentObject.node.id.name}.${parentObjectProperty &&
+        generatePropertyToken(path)}.${name}`,
+      hasParentObjectProperty: parentObjectProperty
+    })
+  ) {
+    path.remove()
+  }
+}
+
 module.exports = ({ types: t }) => {
   const memberExpressionCache = createMemberExpressionCache()
 
@@ -32,6 +57,7 @@ module.exports = ({ types: t }) => {
         programPath.traverse({
           CallExpression: callExpressionPath => {
             const objectName = getObjectName(callExpressionPath.node.callee)
+
             memberExpressionCache.updateCache({
               rawObject: objectName,
               rawMethod: callExpressionPath.node.callee.property.name,
@@ -42,31 +68,9 @@ module.exports = ({ types: t }) => {
           }
         })
       },
-      ObjectProperty: objectPropertyPath => {
-        const name = objectPropertyPath.node.key.name
-        const parentObjectProperty = objectPropertyPath.findParent(
-          parentPath => parentPath.type === "ObjectProperty"
-        )
-        const pathToken =
-          parentObjectProperty && parentObjectProperty.node.key.name
-        const parentObject = objectPropertyPath.findParent(
-          parentPath => parentPath.type === "VariableDeclarator"
-        )
-
-        if (
-          isMethod(objectPropertyPath) &&
-          !isUsedMethod({
-            obj: parentObject.node.id.name,
-            method: name,
-            cache: memberExpressionCache.getCache(),
-            pathToken: `${parentObject.node.id.name}.${parentObjectProperty &&
-              generatePropertyToken(objectPropertyPath)}.${name}`,
-            hasParentObjectProperty: parentObjectProperty
-          })
-        ) {
-          objectPropertyPath.remove()
-        }
-      }
+      ObjectProperty: path => handleObjectProperty(path, memberExpressionCache),
+      ObjectMethod: path =>
+        handleObjectProperty(path, memberExpressionCache, true)
     }
   }
 }

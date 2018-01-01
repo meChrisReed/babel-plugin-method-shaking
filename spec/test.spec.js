@@ -83,5 +83,14 @@ test("deep-methods", async t => {
   )
   // log(JSON.stringify(transform(await sample).ast))
   // t.fail()
+  t.is(pluginTransform(await sample), noPluginTransform(await expected))
+})
+
+test("shorthand-methods", async t => {
+  const sample = filePromise("spec/fixtures/shorthand-methods.sample.js")
+
+  const expected = filePromise("spec/fixtures/shorthand-methods.expected.js")
+  // log(JSON.stringify(transform(await sample).ast))
+  // t.fail()
   t.is(pluginTransform(await sample, true), noPluginTransform(await expected))
 })
