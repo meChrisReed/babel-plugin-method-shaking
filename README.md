@@ -20,7 +20,7 @@ The pattern I have been using to iterate changes:
 
 ## TODO:
 
-**Tech Debt**
+### Tech Debt
 
 * Update the testing pattern. I would like to write a package script that will:
   * Prompt for the name of test(s) you would like to isolate
@@ -30,14 +30,56 @@ The pattern I have been using to iterate changes:
 * ~~Break functions out into util files~~
 * Use babel to build this package before testing. To take advantage of modern language features
 
-**Features**
+### Features
 
-* ~~Match original method name and original object identifier~~
-* ~~Deep methods~~
-* ~~Correctly match calls with the same method name, but different property paths. `a.used.call()` vs `a.unused.call`~~
-* ~~Correctly match deep different paths `a.b.c.call` vs `a.d.c.call`~~
-* Clean out empty properties that have had all of their properties removed `obj = {used: {a: Function}, unused: {}}` the property `unused` can be removed
 * All of the method creation patterns
+  * shorthand: `{fun(){}}`
+  * assigned: `function() {this.primitive = Function; this.fat = () => null; this.fun = function() {}}`
+  * class method: `class plop {fun() {}}`
+  * computed name: `{[name](param){return null}}`
+  * generators: `function* () {}`
+  * short hand generators: `*name(){}`
+  * new:
+    ```javascript
+    const numA = "numA",
+      numB = "numB"
+    const sum = new Function(numA, numB, "return numA + numB")
+    sum(1, 1) // => 2
+    ```
+* Clean out empty properties that have had all of their properties removed `obj = {used: {a: Function}, unused: {}}` the property `unused` can be removed
 * Follow inheritance chains
 * Follow renaming paths
+* Follow assignment of identifiers
+  * `const fn = () => null; this.method = fn`
+  * `function fn () {}; this.method = fn`
+  * `function fn () {}; const obj = {fun: fn}`
 * High fives all around
+
+## Done
+
+* Match original method name and original object identifier
+  ```javascript
+  const obj = {
+    primitive: Function,
+    fat: () => null,
+    fun: function() {}
+  }
+  ```
+  * Deep methods
+  ```javascript
+  const obj = {
+    used: { call: Function },
+    unused: { call: FUnction }
+  }
+  ```
+  * Correctly match calls with the same method name, but different property paths. `a.used.call()` vs `a.unused.call`
+  * Correctly match deep different paths `a.b.c.call` vs `a.d.c.call`
+  * All of the method creation patterns
+  * as properties:
+  ```javascript
+  const obj = {
+    primitive: Function,
+    fat: () => null,
+    fun: function() {}
+  }
+  ```
