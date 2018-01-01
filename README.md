@@ -33,7 +33,6 @@ The pattern I have been using to iterate changes:
 ### Features
 
 * All of the method creation patterns
-  * shorthand: `{fun(){}}`
   * assigned: `function() {this.primitive = Function; this.fat = () => null; this.fun = function() {}}`
   * class method: `class plop {fun() {}}`
   * computed name: `{[name](param){return null}}`
@@ -83,3 +82,4 @@ The pattern I have been using to iterate changes:
     fun: function() {}
   }
   ```
+  * shorthand: `{fun(){}}`
